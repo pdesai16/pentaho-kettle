@@ -84,6 +84,7 @@ import org.pentaho.di.repository.pur.model.EERepositoryObject;
 import org.pentaho.di.repository.pur.model.EETransMeta;
 import org.pentaho.di.repository.pur.model.EEUserInfo;
 import org.pentaho.di.repository.pur.model.RepositoryLock;
+import org.pentaho.di.repository.IRepositoryInfo;
 import org.pentaho.di.shared.SharedObjectInterface;
 import org.pentaho.di.shared.SharedObjects;
 import org.pentaho.di.trans.TransMeta;
@@ -116,7 +117,8 @@ import org.pentaho.platform.repository2.unified.webservices.jaxws.IUnifiedReposi
 @RepositoryPlugin( id = "PentahoEnterpriseRepository", name = "RepositoryType.Name.EnterpriseRepository",
     description = "RepositoryType.Description.EnterpriseRepository",
     metaClass = "org.pentaho.di.repository.pur.PurRepositoryMeta", i18nPackageName = "org.pentaho.di.repository.pur" )
-public class PurRepository extends AbstractRepository implements Repository, ReconnectableRepository, RepositoryExtended, java.io.Serializable {
+public class PurRepository extends AbstractRepository implements Repository, ReconnectableRepository, RepositoryExtended, 
+      IRepositoryInfo, java.io.Serializable {
 
   private static final long serialVersionUID = 7460109109707189479L; /* EESOURCE: UPDATE SERIALVERUID */
 
@@ -2970,4 +2972,21 @@ public class PurRepository extends AbstractRepository implements Repository, Rec
     }
     return false;
   }
+  
+  /**
+   * Returns the class name
+   * @see IRepositoryInfo
+   */
+  public String getSimpleClassName() {
+    return this.getClass().getSimpleName();
+  }
+  
+  /**
+   * Returns the String url of the repository location
+   * @see IRepositoryInfo
+   */
+  public String getRepositoryLocation() {
+    return repositoryMeta.getRepositoryLocation().getUrl();
+  }
+  
 }

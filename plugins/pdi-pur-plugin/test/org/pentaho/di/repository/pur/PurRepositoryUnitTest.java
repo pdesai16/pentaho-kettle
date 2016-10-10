@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,6 +59,7 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFile;
 import org.pentaho.platform.api.repository2.unified.RepositoryFileTree;
 import org.pentaho.platform.api.repository2.unified.RepositoryRequest;
 import org.pentaho.platform.repository2.ClientRepositoryPaths;
+import org.pentaho.di.repository.RepositoriesMeta;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -441,5 +444,34 @@ public class PurRepositoryUnitTest extends RepositoryTestLazySupport {
     rep.saveTransOrJob( transformer, trans, "", Calendar.getInstance(), false, false, false, false, false );
 
     verify( extensionPoint, times( 1 ) ).callExtensionPoint( any( LogChannelInterface.class ), same( transFromRepo ) );
+  }
+
+  @Test
+  public void testGetSimpleClassName() {
+
+    // Create repository
+    PurRepository repository = new PurRepository();
+    assertEquals(repository.getSimpleClassName(), repository.getClass().getSimpleName());
+  }
+
+  @Test
+  public void testGetRepositoryLocation() {
+
+    // Create repository
+    PurRepository repository = new PurRepository();
+    // Create a dummy properties object and use it to populate RepositoriesMeta
+    Map<String, Object> properties = new HashMap<String, Object>();
+    properties.put( "displayName", "Display Name" );
+    properties.put( "url", "URL" );
+    properties.put( "description", "Description" );
+    properties.put( "isDefault", true );
+    RepositoriesMeta repositoriesMeta = mock( RepositoriesMeta.class );
+
+    PurRepositoryMeta purRepositoryMeta = new PurRepositoryMeta();
+    purRepositoryMeta.populate( properties, repositoriesMeta );
+    repository.init(purRepositoryMeta);
+
+    assertEquals(repository.getRepositoryLocation(), "URL");
+
   }
 }
