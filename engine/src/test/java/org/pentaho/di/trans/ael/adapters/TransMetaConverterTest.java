@@ -67,10 +67,16 @@ import org.pentaho.metastore.api.exceptions.MetaStoreException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -355,6 +361,10 @@ public class TransMetaConverterTest {
     TransMeta parentTransMeta = new TransMeta( getClass().getResource( "trans-meta-converter-parent.ktr" ).getPath() );
     Transformation transformation = TransMetaConverter.convert( parentTransMeta );
 
+    //TEST Code
+    Optional<String> ops = convertToString( transformation );
+    System.out.println( ops.toString() );
+
     @SuppressWarnings( { "unchecked", "ConstantConditions" } )
     HashMap<String, Transformation> config =
       (HashMap<String, Transformation>) transformation.getConfig( TransMetaConverter.SUB_TRANSFORMATIONS_KEY ).get();
@@ -369,12 +379,18 @@ public class TransMetaConverterTest {
     TransMeta transMeta = new TransMeta( );
     RepositoryDirectoryInterface repositoryDirectory = new RepositoryDirectory( null, "public");
     String directory = getClass().getResource( "" ).toString().replace( File.separator, "/" );
-    when( repository.findDirectory( "public" ) ).thenReturn( repositoryDirectory );
-    when( repository.loadTransformation( "trans-meta-converter-sub.ktr", repositoryDirectory, null, true, null ) ).thenReturn( transMeta );
+    //when( repository.findDirectory( "public" ) ).thenReturn( repositoryDirectory );
+    RepositoryDirectoryInterface newRepositoryDirectory = new RepositoryDirectory( null, directory);
+    when( repository.findDirectory( "public" ) ).thenReturn(  newRepositoryDirectory );
+    when( repository.loadTransformation( "trans-meta-converter-sub.ktr", newRepositoryDirectory, null, true, null ) ).thenReturn( transMeta );
     parentTransMeta.setRepository( repository );
     parentTransMeta.setRepositoryDirectory( repositoryDirectory );
     parentTransMeta.setVariable( "Internal.Entry.Current.Directory", "public" );
     Transformation transformation = TransMetaConverter.convert( parentTransMeta );
+
+    //TEST Code
+    Optional<String> ops = convertToString( transformation );
+    System.out.println( ops.toString() );
 
     @SuppressWarnings( { "unchecked", "ConstantConditions" } )
     HashMap<String, Transformation> config =
@@ -454,6 +470,17 @@ public class TransMetaConverterTest {
 
     @Override public StepDataInterface getStepData() {
       return null;
+    }
+  }
+
+  static Optional<String> convertToString( final Serializable object) {
+    try ( final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+          ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+      oos.writeObject(object);
+      return Optional.of( Base64.getEncoder().encodeToString(baos.toByteArray()));
+    } catch (final IOException e) {
+      e.printStackTrace();
+      return Optional.empty();
     }
   }
 }
